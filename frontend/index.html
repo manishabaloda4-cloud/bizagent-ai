@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BizAgent AI — Smart Business Assistant for Indian SMBs</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --surface2: #1a1a24;
+    --border: #2a2a3a;
+    --amd-red: #ED1C24;
+    --amd-orange: #FF6B00;
+    --accent: #FF6B00;
+    --text: #f0f0f0;
+    --muted: #888;
+    --success: #22c55e;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+  }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Header */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .logo-icon {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, var(--amd-red), var(--amd-orange));
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 14px;
+    color: white;
+  }
+
+  .logo-text { font-size: 18px; font-weight: 700; }
+  .logo-sub { font-size: 11px; color: var(--muted); letter-spacing: 0.5px; }
+
+  .amd-badge {
+    background: linear-gradient(135deg, #1a0a0a, #2a1010);
+    border: 1px solid #ED1C2440;
+    color: var(--amd-red);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+
+  /* Layout */
+  .app {
+    display: grid;
+    grid-template-columns: 260px 1fr 280px;
+    flex: 1;
+    height: calc(100vh - 61px);
+    overflow: hidden;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  .sidebar-section {
+    padding: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .sidebar-title {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  /* Stats */
+  .stat-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 8px;
+  }
+
+  .stat-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .stat-value { font-size: 20px; font-weight: 700; }
+  .stat-change { font-size: 11px; color: var(--success); margin-top: 2px; }
+
+  /* Alerts */
+  .alert-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    border-radius: 6px;
+    margin-bottom: 6px;
+    font-size: 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+  }
+
+  .alert-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .dot-critical { background: var(--danger); }
+  .dot-low { background: var(--warning); }
+  .dot-out { background: #888; }
+
+  /* Quick actions */
+  .quick-btn {
+    width: 100%;
+    text-align: left;
+    padding: 8px 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-size: 12px;
+    cursor: pointer;
+    margin-bottom: 6px;
+    transition: all 0.15s;
+  }
+
+  .quick-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: #ff6b0010;
+  }
+
+  /* Chat */
+  .chat-area {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .chat-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .agent-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .agent-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--success);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .lang-toggle {
+    margin-left: auto;
+    display: flex;
+    gap: 4px;
+  }
+
+  .lang-btn {
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .lang-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
+
+  /* Messages */
+  .messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .message {
+    display: flex;
+    gap: 10px;
+    max-width: 85%;
+    animation: fadeIn 0.2s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .message.user { align-self: flex-end; flex-direction: row-reverse; }
+
+  .msg-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+    font-weight: 700;
+  }
+
+  .msg-avatar.bot {
+    background: linear-gradient(135deg, var(--amd-red), var(--amd-orange));
+    color: white;
+  }
+
+  .msg-avatar.user-av {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--accent);
+  }
+
+  .msg-bubble {
+    padding: 12px 14px;
+    border-radius: 12px;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .message.bot .msg-bubble {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-top-left-radius: 4px;
+  }
+
+  .message.user .msg-bubble {
+    background: linear-gradient(135deg, #ff6b0020, #ed1c2420);
+    border: 1px solid #ff6b0040;
+    border-top-right-radius: 4px;
+  }
+
+  .msg-meta {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 4px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .agent-tag {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 1px 6px;
+    border-radius: 10px;
+    font-size: 10px;
+    color: var(--accent);
+  }
+
+  /* Input */
+  .input-area {
+    padding: 16px 20px;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .input-row {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+  }
+
+  .input-box {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-size: 14px;
+    resize: none;
+    outline: none;
+    transition: border-color 0.15s;
+    font-family: inherit;
+    max-height: 120px;
+  }
+
+  .input-box:focus { border-color: var(--accent); }
+  .input-box::placeholder { color: var(--muted); }
+
+  .send-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--amd-red), var(--amd-orange));
+    border: none;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    transition: opacity 0.15s;
+    flex-shrink: 0;
+  }
+
+  .send-btn:hover { opacity: 0.85; }
+  .send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* Right panel */
+  .right-panel {
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .panel-section {
+    padding: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .panel-title {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  /* GST deadlines */
+  .deadline-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-bottom: 6px;
+    font-size: 12px;
+  }
+
+  .deadline-name { font-weight: 600; }
+  .deadline-due { color: var(--warning); }
+
+  /* Sales chart */
+  .chart-bar-wrap {
+    margin-top: 8px;
+  }
+
+  .chart-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-size: 11px;
+  }
+
+  .chart-label { width: 80px; color: var(--muted); }
+
+  .chart-bar-bg {
+    flex: 1;
+    height: 6px;
+    background: var(--surface2);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .chart-bar {
+    height: 100%;
+    border-radius: 3px;
+    background: linear-gradient(90deg, var(--amd-red), var(--amd-orange));
+    transition: width 1s ease;
+  }
+
+  .chart-val { width: 50px; text-align: right; color: var(--text); }
+
+  /* Typing indicator */
+  .typing {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    padding: 10px 14px;
+  }
+
+  .typing span {
+    width: 6px;
+    height: 6px;
+    background: var(--muted);
+    border-radius: 50%;
+    animation: bounce 1.2s infinite;
+  }
+
+  .typing span:nth-child(2) { animation-delay: 0.2s; }
+  .typing span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes bounce {
+    0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+    40% { transform: scale(1.2); opacity: 1; }
+  }
+
+  /* Welcome */
+  .welcome {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--muted);
+  }
+
+  .welcome-icon {
+    font-size: 40px;
+    margin-bottom: 12px;
+  }
+
+  .welcome h3 {
+    color: var(--text);
+    font-size: 18px;
+    margin-bottom: 8px;
+  }
+
+  .welcome p { font-size: 13px; line-height: 1.6; }
+
+  .suggestion-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 16px;
+  }
+
+  .chip {
+    padding: 6px 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: var(--text);
+  }
+
+  .chip:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: #ff6b0010;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">BA</div>
+    <div>
+      <div class="logo-text">BizAgent AI</div>
+      <div class="logo-sub">SMART ASSISTANT FOR INDIAN SMBS</div>
+    </div>
+  </div>
+  <div class="amd-badge">⚡ AMD GPU POWERED</div>
+</header>
+
+<div class="app">
+
+  <!-- Left Sidebar -->
+  <aside class="sidebar">
+
+    <div class="sidebar-section">
+      <div class="sidebar-title">This Week's Sales</div>
+      <div class="stat-card">
+        <div class="stat-label">Total Revenue</div>
+        <div class="stat-value">₹47,500</div>
+        <div class="stat-change">↑ 12% vs last week</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total Orders</div>
+        <div class="stat-value">89</div>
+        <div class="stat-change">↑ 8% vs last week</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Avg. Order Value</div>
+        <div class="stat-value">₹534</div>
+        <div class="stat-change">Best day: Saturday</div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-title">⚠️ Stock Alerts</div>
+      <div class="alert-item">
+        <div class="alert-dot dot-out"></div>
+        <div>Product E — <strong>OUT OF STOCK</strong></div>
+      </div>
+      <div class="alert-item">
+        <div class="alert-dot dot-critical"></div>
+        <div>Product C — Only 3 units left</div>
+      </div>
+      <div class="alert-item">
+        <div class="alert-dot dot-low"></div>
+        <div>Product B — Only 8 units left</div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-title">Quick Actions</div>
+      <button class="quick-btn" onclick="sendQuick('Show me this week\\'s sales report')">📊 Sales Report</button>
+      <button class="quick-btn" onclick="sendQuick('What items are low in stock?')">📦 Inventory Check</button>
+      <button class="quick-btn" onclick="sendQuick('When is the next GST filing deadline?')">🧾 GST Deadlines</button>
+      <button class="quick-btn" onclick="sendQuick('A customer is asking about delivery time')">💬 Customer Query</button>
+      <button class="quick-btn" onclick="sendQuick('मेरी बिक्री कैसी है इस हफ्ते?')">🇮🇳 Hindi Mode</button>
+    </div>
+
+  </aside>
+
+  <!-- Chat -->
+  <main class="chat-area">
+    <div class="chat-header">
+      <div class="agent-indicator">
+        <div class="agent-dot"></div>
+        <span id="current-agent">BizAgent AI is ready</span>
+      </div>
+      <div class="lang-toggle">
+        <button class="lang-btn active" id="btn-en" onclick="setLang('en')">EN</button>
+        <button class="lang-btn" id="btn-hi" onclick="setLang('hi')">HI</button>
+      </div>
+    </div>
+
+    <div class="messages" id="messages">
+      <div class="welcome">
+        <div class="welcome-icon">🤖</div>
+        <h3>Welcome to BizAgent AI</h3>
+        <p>Your AI-powered business assistant running on AMD GPU Cloud.<br>
+        Ask me anything about your business — in Hindi or English.</p>
+        <div class="suggestion-chips">
+          <div class="chip" onclick="sendQuick('Show me my sales report')">📊 Sales Report</div>
+          <div class="chip" onclick="sendQuick('GST filing deadline this month')">🧾 GST Help</div>
+          <div class="chip" onclick="sendQuick('Which products are running low?')">📦 Inventory</div>
+          <div class="chip" onclick="sendQuick('Customer asking about return policy')">💬 Customer Support</div>
+          <div class="chip" onclick="sendQuick('मेरे व्यापार की जानकारी दो')">🇮🇳 हिंदी में</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="input-area">
+      <div class="input-row">
+        <textarea
+          class="input-box"
+          id="user-input"
+          rows="1"
+          placeholder="Ask anything about your business... (Hindi or English)"
+          onkeydown="handleKey(event)"
+          oninput="autoResize(this)"
+        ></textarea>
+        <button class="send-btn" id="send-btn" onclick="sendMessage()">➤</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Right Panel -->
+  <aside class="right-panel">
+
+    <div class="panel-section">
+      <div class="panel-title">GST Deadlines</div>
+      <div class="deadline-item">
+        <div>
+          <div class="deadline-name">GSTR-1</div>
+          <div style="font-size:10px;color:var(--muted)">Sales return</div>
+        </div>
+        <div class="deadline-due">11th monthly</div>
+      </div>
+      <div class="deadline-item">
+        <div>
+          <div class="deadline-name">GSTR-3B</div>
+          <div style="font-size:10px;color:var(--muted)">Summary return</div>
+        </div>
+        <div class="deadline-due">20th monthly</div>
+      </div>
+      <div class="deadline-item">
+        <div>
+          <div class="deadline-name">GSTR-9</div>
+          <div style="font-size:10px;color:var(--muted)">Annual return</div>
+        </div>
+        <div class="deadline-due">Dec 31</div>
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="panel-title">Top Products This Week</div>
+      <div class="chart-bar-wrap">
+        <div class="chart-row">
+          <div class="chart-label">Product A</div>
+          <div class="chart-bar-bg"><div class="chart-bar" style="width:100%"></div></div>
+          <div class="chart-val">₹17,000</div>
+        </div>
+        <div class="chart-row">
+          <div class="chart-label">Product C</div>
+          <div class="chart-bar-bg"><div class="chart-bar" style="width:97%"></div></div>
+          <div class="chart-val">₹16,500</div>
+        </div>
+        <div class="chart-row">
+          <div class="chart-label">Product B</div>
+          <div class="chart-bar-bg"><div class="chart-bar" style="width:82%"></div></div>
+          <div class="chart-val">₹14,000</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="panel-title">Payment Methods</div>
+      <div class="chart-bar-wrap">
+        <div class="chart-row">
+          <div class="chart-label">UPI</div>
+          <div class="chart-bar-bg"><div class="chart-bar" style="width:62%"></div></div>
+          <div class="chart-val">62%</div>
+        </div>
+        <div class="chart-row">
+          <div class="chart-label">Cash</div>
+          <div class="chart-bar-bg"><div class="chart-bar" style="width:28%"></div></div>
+          <div class="chart-val">28%</div>
+        </div>
+        <div class="chart-row">
+          <div class="chart-label">Card</div>
+          <div class="chart-bar-bg"><div class="chart-bar" style="width:10%"></div></div>
+          <div class="chart-val">10%</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="panel-title">Powered By</div>
+      <div style="font-size:11px;color:var(--muted);line-height:1.8">
+        ⚡ AMD GPU Developer Cloud<br>
+        🔥 Fireworks AI API<br>
+        🐍 Python + FastAPI<br>
+        🤖 LangChain Agents<br>
+        🗄️ Supabase (GitHub Student Pack)
+      </div>
+    </div>
+
+  </aside>
+</div>
+
+<script>
+  const API = '';  // Same origin — FastAPI serves this
+  let currentLang = 'en';
+  let sessionId = 'session_' + Math.random().toString(36).substr(2, 9);
+  let isLoading = false;
+
+  function setLang(lang) {
+    currentLang = lang;
+    document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+    document.getElementById('btn-hi').classList.toggle('active', lang === 'hi');
+    const input = document.getElementById('user-input');
+    input.placeholder = lang === 'hi' 
+      ? 'अपने व्यापार के बारे में कुछ भी पूछें...'
+      : 'Ask anything about your business... (Hindi or English)';
+  }
+
+  function autoResize(el) {
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+  }
+
+  function handleKey(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  }
+
+  function sendQuick(text) {
+    document.getElementById('user-input').value = text;
+    sendMessage();
+  }
+
+  function addMessage(content, type, meta = {}) {
+    const msgs = document.getElementById('messages');
+    
+    // Remove welcome screen on first message
+    const welcome = msgs.querySelector('.welcome');
+    if (welcome) welcome.remove();
+
+    const div = document.createElement('div');
+    div.className = `message ${type}`;
+    
+    const avatar = document.createElement('div');
+    avatar.className = `msg-avatar ${type === 'bot' ? 'bot' : 'user-av'}`;
+    avatar.textContent = type === 'bot' ? 'BA' : 'U';
+
+    const bubble = document.createElement('div');
+    bubble.className = 'msg-bubble';
+    bubble.textContent = content;
+
+    if (type === 'bot' && meta.agent) {
+      const metaDiv = document.createElement('div');
+      metaDiv.className = 'msg-meta';
+      metaDiv.innerHTML = `<span class="agent-tag">${meta.agent} agent</span> <span>${meta.lang || ''}</span>`;
+      bubble.appendChild(metaDiv);
+    }
+
+    div.appendChild(avatar);
+    div.appendChild(bubble);
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function addTyping() {
+    const msgs = document.getElementById('messages');
+    const div = document.createElement('div');
+    div.className = 'message bot';
+    div.id = 'typing-indicator';
+
+    const avatar = document.createElement('div');
+    avatar.className = 'msg-avatar bot';
+    avatar.textContent = 'BA';
+
+    const bubble = document.createElement('div');
+    bubble.className = 'msg-bubble';
+    bubble.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
+
+    div.appendChild(avatar);
+    div.appendChild(bubble);
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function removeTyping() {
+    const t = document.getElementById('typing-indicator');
+    if (t) t.remove();
+  }
+
+  async function sendMessage() {
+    if (isLoading) return;
+    const input = document.getElementById('user-input');
+    const query = input.value.trim();
+    if (!query) return;
+
+    isLoading = true;
+    input.value = '';
+    input.style.height = 'auto';
+    document.getElementById('send-btn').disabled = true;
+    document.getElementById('current-agent').textContent = 'Processing...';
+
+    addMessage(query, 'user');
+    addTyping();
+
+    try {
+      const response = await fetch(`${API}/api/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query,
+          session_id: sessionId,
+          history: []
+        })
+      });
+
+      const data = await response.json();
+      removeTyping();
+
+      if (response.ok) {
+        addMessage(data.response, 'bot', {
+          agent: data.agent_used,
+          lang: data.language
+        });
+        document.getElementById('current-agent').textContent =
+          `Last used: ${data.agent_used} agent`;
+      } else {
+        addMessage('Sorry, something went wrong. Please try again.', 'bot', {});
+      }
+    } catch (err) {
+      removeTyping();
+      // Demo mode — simulate response when API not available
+      const demoResponses = {
+        sales: '📊 This week\'s sales: ₹47,500 revenue across 89 orders. Growth of 12% vs last week! Best day was Saturday. Top product: Product A with ₹17,000 revenue.',
+        gst: '🧾 Next GST deadlines: GSTR-1 due on the 11th (sales return), GSTR-3B due on the 20th (summary return). File on time to avoid ₹50/day penalty!',
+        inventory: '📦 3 items need immediate attention: Product E is OUT OF STOCK, Product C has only 3 units left (critical!), and Product B has only 8 units (low). Reorder immediately!',
+        customer: '💬 Customer reply: Thank you for reaching out! We\'re open Monday-Saturday 9AM-8PM. For returns, please bring your original receipt within 7 days. We accept UPI, cash, and cards.',
+        default: `🤖 BizAgent AI is running in demo mode. Connect your Fireworks AI API key to enable full AI responses. Your query: "${query}" would be handled by our specialized agents.`
+      };
+
+      const q = query.toLowerCase();
+      let resp = demoResponses.default;
+      if (q.includes('sale') || q.includes('revenue') || q.includes('बिक्री')) resp = demoResponses.sales;
+      else if (q.includes('gst') || q.includes('tax') || q.includes('टैक्स')) resp = demoResponses.gst;
+      else if (q.includes('stock') || q.includes('inventory') || q.includes('स्टॉक')) resp = demoResponses.inventory;
+      else if (q.includes('customer') || q.includes('delivery') || q.includes('return')) resp = demoResponses.customer;
+
+      addMessage(resp, 'bot', { agent: 'demo', lang: currentLang });
+      document.getElementById('current-agent').textContent = 'Demo mode (add API key)';
+    }
+
+    isLoading = false;
+    document.getElementById('send-btn').disabled = false;
+    input.focus();
+  }
+</script>
+</body>
+</html>
