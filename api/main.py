@@ -86,7 +86,10 @@ async def chat(req: QueryRequest):
             priority=result["priority"],
             session_id=req.session_id
         )
-    except Exception as e:
+   except Exception as e:
+        import traceback
+        print(f"ERROR: {str(e)}")
+        print(traceback.format_exc())
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/inventory/alerts")
