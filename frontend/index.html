@@ -826,6 +826,8 @@
       }
     } catch (err) {
       removeTyping();
+      addMessage('Sorry, something went wrong. Please try again. Error: ' + err.message, 'bot', {});
+      document.getElementById('current-agent').textContent = 'Error occurred';
       // Demo mode — simulate response when API not available
       const demoResponses = {
         sales: '📊 This week\'s sales: ₹47,500 revenue across 89 orders. Growth of 12% vs last week! Best day was Saturday. Top product: Product A with ₹17,000 revenue.',
