@@ -62,23 +62,16 @@ async def health():
         "version": "1.0.0",
         "amd_powered": True
     }
-
 @app.post("/api/chat", response_model=QueryResponse)
 async def chat(req: QueryRequest):
     try:
         from agents.orchestrator import process_query
-
-        # Get session history
+        import traceback
         history = sessions.get(req.session_id, [])
-
-        # Process query
         result = process_query(req.query, history)
-
-        # Update session history
         history.append({"role": "user", "content": req.query})
         history.append({"role": "assistant", "content": result["response"]})
-        sessions[req.session_id] = history[-20:]  # Keep last 10 exchanges
-
+        sessions[req.session_id] = history[-20:]
         return QueryResponse(
             response=result["response"],
             agent_used=result["agent_used"],
@@ -86,12 +79,11 @@ async def chat(req: QueryRequest):
             priority=result["priority"],
             session_id=req.session_id
         )
-   except Exception as e:
+    except Exception as e:
         import traceback
         print(f"ERROR: {str(e)}")
         print(traceback.format_exc())
         raise HTTPException(status_code=500, detail=str(e))
-
 @app.get("/api/inventory/alerts")
 async def inventory_alerts():
     """Get low stock alerts."""
