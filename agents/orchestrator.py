@@ -41,7 +41,7 @@ def route_query(query: str) -> dict:
     """Route incoming query to the right specialist agent."""
     try:
         response = client.chat.completions.create(
-            model="accounts/fireworks/models/llama-v3p1-8b-instruct",
+            model="accounts/fireworks/models/deepseek-v4-pro",
             messages=[
                 {"role": "system", "content": "You are a JSON-only routing agent. Return only valid JSON."},
                 {"role": "user", "content": AGENT_ROUTER_PROMPT.format(query=query)}
@@ -90,7 +90,7 @@ def run_general(query: str, language: str, history: list = None) -> str:
     messages.append({"role": "user", "content": query})
 
     response = client.chat.completions.create(
-        model="accounts/fireworks/models/llama-v3p1-70b-instruct",
+        model="accounts/fireworks/models/deepseek-v4-pro",
         messages=messages,
         max_tokens=512,
         temperature=0.4,
