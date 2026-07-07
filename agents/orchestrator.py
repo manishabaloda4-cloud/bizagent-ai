@@ -8,6 +8,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+import dotenv
+dotenv.load_dotenv()
 client = Fireworks(api_key=os.getenv("FIREWORKS_API_KEY"))
 
 SYSTEM_PROMPT = """You are BizAgent AI — an intelligent business assistant built specifically 
